@@ -278,33 +278,33 @@ struct ContentView: View {
             
             // 1. Прокручиваемый контент
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 30) {
+                VStack(spacing: 22) {
                     // Верхняя шапка с одной кнопкой «+»
                     headerSection
-                        .padding(.horizontal, 24)
-                        .padding(.top, 24)
+                        .padding(.horizontal, 22)
+                        .padding(.top, 16)
                     
                     // Уведомление о распознанной ссылке (если есть)
                     if let notification = bannerNotification {
                         toastBanner(notification)
-                            .padding(.horizontal, 24)
+                            .padding(.horizontal, 22)
                             .transition(.move(edge: .top).combined(with: .opacity))
                     }
                     
                     // Центральная тактильная кнопка питания
                     centerPowerButton
-                        .padding(.vertical, 6)
+                        .padding(.vertical, 4)
                     
                     // Секция серверов с кнопкой «Пинг»
                     serverListSection
-                        .padding(.horizontal, 24)
+                        .padding(.horizontal, 22)
                     
                     // Секция подписок (как в HAPP: лимиты, системные сообщения, даты)
                     subscriptionsSection
-                        .padding(.horizontal, 24)
+                        .padding(.horizontal, 22)
                     
                     // Запас для прокрутки под нижний блюр
-                    Spacer(minLength: 140)
+                    Spacer(minLength: 120)
                 }
             }
             
@@ -323,7 +323,7 @@ struct ContentView: View {
     private var headerSection: some View {
         HStack(alignment: .center) {
             Text("Привет, Алекс")
-                .font(.system(size: 32, weight: .bold, design: .serif))
+                .font(.system(size: 28, weight: .bold, design: .serif))
                 .foregroundColor(textPrimary)
             
             Spacer()
@@ -357,10 +357,10 @@ struct ContentView: View {
                 }
             } label: {
                 Image(systemName: "plus")
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(textPrimary)
-                    .frame(width: 48, height: 48)
-                    .glassEffect(.regular.interactive(), cornerRadius: 24)
+                    .frame(width: 44, height: 44)
+                    .glassEffect(.regular.interactive(), cornerRadius: 22)
             }
         }
     }
@@ -384,7 +384,7 @@ struct ContentView: View {
     
     // MARK: - 2. Центральная кнопка питания
     private var centerPowerButton: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             Button(action: {
                 vpn.toggle(selectedServer: selectedServer)
             }) {
@@ -394,9 +394,9 @@ struct ContentView: View {
                             vpn.state == .connected
                             ? Color(red: 0.22, green: 0.78, blue: 0.54).opacity(0.18)
                             : accentColor.opacity(0.10),
-                            lineWidth: 18
+                            lineWidth: 14
                         )
-                        .frame(width: 174, height: 174)
+                        .frame(width: 154, height: 154)
                         .scaleEffect(vpn.state == .connected ? 1.05 : 1.0)
                         .animation(
                             vpn.state == .connected
@@ -407,17 +407,17 @@ struct ContentView: View {
                     
                     Circle()
                         .fill(cardWhite)
-                        .frame(width: 140, height: 140)
+                        .frame(width: 126, height: 126)
                         .shadow(
                             color: (vpn.state == .connected ? Color(red: 0.22, green: 0.78, blue: 0.54) : accentColor).opacity(0.18),
-                            radius: 20,
+                            radius: 16,
                             x: 0,
-                            y: 8
+                            y: 6
                         )
                     
-                    VStack(spacing: 7) {
+                    VStack(spacing: 5) {
                         Image(systemName: "power")
-                            .font(.system(size: 38, weight: .medium))
+                            .font(.system(size: 34, weight: .medium))
                             .foregroundColor(vpn.state.accentColor)
                         
                         Text(vpn.state == .connected ? "ВКЛ" : "ВЫКЛ")
@@ -428,15 +428,15 @@ struct ContentView: View {
             }
             .buttonStyle(ScaleButtonStyle())
             
-            VStack(spacing: 4) {
+            VStack(spacing: 3) {
                 Text(vpn.state == .connected ? "ПОДКЛЮЧЕНО" : "НАЖМИТЕ ДЛЯ СТАРТА")
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .font(.system(size: 12.5, weight: .bold, design: .rounded))
                     .foregroundColor(vpn.state.accentColor)
-                    .tracking(0.8)
+                    .tracking(0.6)
                 
                 if vpn.state == .connected {
                     Text("\(vpn.downloadSpeed) • \(selectedServer.name)")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: 11.5, weight: .medium))
                         .foregroundColor(textMuted)
                 }
             }

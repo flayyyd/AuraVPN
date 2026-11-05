@@ -26,3 +26,6 @@ targets:
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.auravpn.app
       GENERATE_INFOPLIST_FILE: NO
+      INFOPLIST_FILE: AuraVPN/Info.plist
+      CURRENT_PROJECT_VERSION: 1
+      MARKETING_VERSION: "1.0.0"
