@@ -35,7 +35,7 @@ public struct LiquidGlassViewModifier: ViewModifier {
         self.cornerRadius = cornerRadius
     }
     
-    public func makeBody(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             // 1. Системный оптический материал Liquid Glass (Apple Metal шейдер размытия и отражения)
             .background(
