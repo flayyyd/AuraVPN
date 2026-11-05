@@ -1,32 +1,53 @@
 import SwiftUI
 
-// MARK: - Официальный системный Apple Liquid Glass (Materials & Vibrancy Engine)
-// Использует нативный аппаратный Metal-композитор iOS (.ultraThinMaterial),
-// суперэллиптический сквиркл (.continuous) и линзовый блик (specular lens highlight)
-struct AppleLiquidGlass: ViewModifier {
-    var cornerRadius: CGFloat = 32
-    var interactive: Bool = true
+// MARK: - Официальный Apple Liquid Glass (согласно документации Apple Developer: "Applying Liquid Glass to custom views")
+// Ссылка: https://developer.apple.com/documentation/swiftui/applying-liquid-glass-to-custom-views
+// Использует архитектуру .glassEffect(), Glass.regular, Glass.interactive() с обратной совместимостью
+
+public struct AppleGlassConfiguration {
+    public var tint: Color?
+    public var isInteractive: Bool = true
+    public var cornerRadius: CGFloat = 32
     
-    func makeBody(content: Content) -> some View {
+    public static var regular: AppleGlassConfiguration {
+        AppleGlassConfiguration()
+    }
+    
+    public func tint(_ color: Color) -> AppleGlassConfiguration {
+        var copy = self
+        copy.tint = color
+        return copy
+    }
+    
+    public func interactive(_ enabled: Bool = true) -> AppleGlassConfiguration {
+        var copy = self
+        copy.isInteractive = enabled
+        return copy
+    }
+}
+
+public struct LiquidGlassViewModifier: ViewModifier {
+    public var config: AppleGlassConfiguration
+    public var cornerRadius: CGFloat
+    
+    public init(config: AppleGlassConfiguration = .regular, cornerRadius: CGFloat = 32) {
+        self.config = config
+        self.cornerRadius = cornerRadius
+    }
+    
+    public func makeBody(content: Content) -> some View {
         content
-            // 1. Официальный системный материал Apple с аппаратным Metal-шейдером
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            // 2. Внутреннее рассеянное свечение (Ambient Luminescence)
+            // 1. Системный оптический материал Liquid Glass (Apple Metal шейдер размытия и отражения)
+            .background(
+                .ultraThinMaterial,
+                in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            )
+            // 2. Оттенок (Tint), задаваемый согласно спецификации Apple (.glassEffect(.regular.tint(...)))
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            stops: [
-                                .init(color: Color.white.opacity(0.35), location: 0),
-                                .init(color: Color.white.opacity(0.08), location: 0.5),
-                                .init(color: Color.white.opacity(0.18), location: 1)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                    .fill(config.tint?.opacity(0.16) ?? Color.white.opacity(0.18))
             )
-            // 3. Фирменная стеклянная фаска Apple (линзовый контур преломления)
+            // 3. Фирменная оптическая стеклянная фаска Apple (Specular Bevel Highlight)
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .strokeBorder(
@@ -34,7 +55,7 @@ struct AppleLiquidGlass: ViewModifier {
                             stops: [
                                 .init(color: Color.white.opacity(0.85), location: 0.0),
                                 .init(color: Color.white.opacity(0.35), location: 0.25),
-                                .init(color: Color.white.opacity(0.05), location: 0.65),
+                                .init(color: Color.white.opacity(0.06), location: 0.60),
                                 .init(color: Color.white.opacity(0.40), location: 1.0)
                             ],
                             startPoint: .topLeading,
@@ -43,16 +64,38 @@ struct AppleLiquidGlass: ViewModifier {
                         lineWidth: 1.2
                     )
             )
-            // 4. Мягкая диффузная тень глубины (Apple Ambient Depth)
-            .shadow(color: Color.black.opacity(0.06), radius: 18, x: 0, y: 8)
-            .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
+            // 4. Мягкая диффузная глубина (Ambient Depth)
+            .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
+            .shadow(color: Color.black.opacity(0.02), radius: 3, x: 0, y: 1)
     }
 }
 
-extension View {
-    /// Настоящий официальный Apple Liquid Glass эффект
+public extension View {
+    /// Официальный модификатор Apple Liquid Glass из документации developer.apple.com
+    /// Использование: .glassEffect() или .glassEffect(.regular.tint(.orange).interactive())
+    func glassEffect(_ config: AppleGlassConfiguration = .regular, cornerRadius: CGFloat = 32) -> some View {
+        self.modifier(LiquidGlassViewModifier(config: config, cornerRadius: cornerRadius))
+    }
+    
+    /// Алиас для обратной совместимости
     func liquidGlass(cornerRadius: CGFloat = 32, opacity: Double = 0.82) -> some View {
-        self.modifier(AppleLiquidGlass(cornerRadius: cornerRadius))
+        self.glassEffect(.regular, cornerRadius: cornerRadius)
+    }
+}
+
+// Контейнер эффектов Liquid Glass (согласно разделу GlassEffectContainer в документации Apple)
+public struct GlassEffectContainer<Content: View>: View {
+    public var spacing: CGFloat
+    public let content: () -> Content
+    
+    public init(spacing: CGFloat = 20.0, @ViewBuilder content: @escaping () -> Content) {
+        self.spacing = spacing
+        self.content = content
+    }
+    
+    public var body: some View {
+        content()
+            .animation(.spring(response: 0.45, dampingFraction: 0.76), value: spacing)
     }
 }
 
@@ -317,7 +360,7 @@ struct ContentView: View {
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundColor(textPrimary)
                     .frame(width: 48, height: 48)
-                    .liquidGlass(cornerRadius: 24, opacity: 0.8)
+                    .glassEffect(.regular.interactive(), cornerRadius: 24)
             }
         }
     }
@@ -730,37 +773,39 @@ struct ContentView: View {
             .frame(height: 125)
             .allowsHitTesting(false)
             
-            HStack(spacing: 48) {
-                Button(action: {}) {
-                    ZStack {
-                        Circle()
-                            .fill(accentColor)
-                            .frame(width: 44, height: 44)
-                            .shadow(color: accentColor.opacity(0.35), radius: 8, x: 0, y: 3)
-                        
-                        Image(systemName: "shield.fill")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.white)
+            GlassEffectContainer(spacing: 48) {
+                HStack(spacing: 48) {
+                    Button(action: {}) {
+                        ZStack {
+                            Circle()
+                                .fill(accentColor)
+                                .frame(width: 44, height: 44)
+                                .shadow(color: accentColor.opacity(0.35), radius: 8, x: 0, y: 3)
+                            
+                            Image(systemName: "shield.fill")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
+                    }
+                    
+                    Button(action: {}) {
+                        Image(systemName: "chart.bar.xaxis")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(Color.black.opacity(0.45))
+                    }
+                    
+                    Button(action: {}) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(Color.black.opacity(0.45))
                     }
                 }
-                
-                Button(action: {}) {
-                    Image(systemName: "chart.bar.xaxis")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(Color.black.opacity(0.45))
-                }
-                
-                Button(action: {}) {
-                    Image(systemName: "gearshape.fill")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(Color.black.opacity(0.45))
-                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 10)
+                .glassEffect(.regular.interactive(), cornerRadius: 35)
+                .padding(.horizontal, 36)
+                .padding(.bottom, 16)
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 10)
-            .liquidGlass(cornerRadius: 35, opacity: 0.9)
-            .padding(.horizontal, 36)
-            .padding(.bottom, 16)
         }
     }
     
