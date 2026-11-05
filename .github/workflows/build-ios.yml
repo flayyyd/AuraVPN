@@ -34,8 +34,15 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             build
 
-      - name: Package into .IPA
+      - name: Inject FullScreen Retina Keys and Package into .IPA
         run: |
+          PLIST="build/Build/Products/Release-iphoneos/AuraVPN.app/Info.plist"
+          /usr/libexec/PlistBuddy -c "Set :UILaunchStoryboardName LaunchScreen" "$PLIST" || /usr/libexec/PlistBuddy -c "Add :UILaunchStoryboardName string LaunchScreen" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :UILaunchScreen dict" "$PLIST" || true
+          /usr/libexec/PlistBuddy -c "Add :UIRequiresFullScreen bool true" "$PLIST" || true
+          /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations array" "$PLIST" || true
+          /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations:0 string UIInterfaceOrientationPortrait" "$PLIST" || true
+          plutil -p "$PLIST"
           mkdir -p Payload
           cp -r build/Build/Products/Release-iphoneos/AuraVPN.app Payload/
           zip -r AuraVPN.ipa Payload

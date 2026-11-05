@@ -23,6 +23,13 @@ targets:
       - path: AuraVPN
     info:
       path: AuraVPN/Info.plist
+      properties:
+        UILaunchStoryboardName: LaunchScreen
+        UILaunchScreen: {}
+        UIRequiresFullScreen: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        CFBundleDisplayName: "AuraVPN"
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.auravpn.app
       GENERATE_INFOPLIST_FILE: NO
