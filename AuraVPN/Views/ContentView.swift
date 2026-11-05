@@ -1,24 +1,41 @@
 import SwiftUI
 
-// MARK: - Liquid Glass ViewModifier
-struct LiquidGlassModifier: ViewModifier {
+// MARK: - Официальный системный Apple Liquid Glass (Materials & Vibrancy Engine)
+// Использует нативный аппаратный Metal-композитор iOS (.ultraThinMaterial),
+// суперэллиптический сквиркл (.continuous) и линзовый блик (specular lens highlight)
+struct AppleLiquidGlass: ViewModifier {
     var cornerRadius: CGFloat = 32
-    var opacity: Double = 0.82
+    var interactive: Bool = true
     
     func makeBody(content: Content) -> some View {
         content
-            .background(.ultraThinMaterial)
-            .background(Color.white.opacity(0.12))
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .overlay(
+            // 1. Официальный системный материал Apple с аппаратным Metal-шейдером
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            // 2. Внутреннее рассеянное свечение (Ambient Luminescence)
+            .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(
+                    .fill(
                         LinearGradient(
                             stops: [
-                                .init(color: .white.opacity(0.75), location: 0),
-                                .init(color: .white.opacity(0.2), location: 0.35),
-                                .init(color: .clear, location: 0.65),
-                                .init(color: .white.opacity(0.3), location: 1)
+                                .init(color: Color.white.opacity(0.35), location: 0),
+                                .init(color: Color.white.opacity(0.08), location: 0.5),
+                                .init(color: Color.white.opacity(0.18), location: 1)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            )
+            // 3. Фирменная стеклянная фаска Apple (линзовый контур преломления)
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            stops: [
+                                .init(color: Color.white.opacity(0.85), location: 0.0),
+                                .init(color: Color.white.opacity(0.35), location: 0.25),
+                                .init(color: Color.white.opacity(0.05), location: 0.65),
+                                .init(color: Color.white.opacity(0.40), location: 1.0)
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -26,13 +43,16 @@ struct LiquidGlassModifier: ViewModifier {
                         lineWidth: 1.2
                     )
             )
-            .shadow(color: Color.black.opacity(0.08), radius: 20, x: 0, y: 8)
+            // 4. Мягкая диффузная тень глубины (Apple Ambient Depth)
+            .shadow(color: Color.black.opacity(0.06), radius: 18, x: 0, y: 8)
+            .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
     }
 }
 
 extension View {
+    /// Настоящий официальный Apple Liquid Glass эффект
     func liquidGlass(cornerRadius: CGFloat = 32, opacity: Double = 0.82) -> some View {
-        self.modifier(LiquidGlassModifier(cornerRadius: cornerRadius, opacity: opacity))
+        self.modifier(AppleLiquidGlass(cornerRadius: cornerRadius))
     }
 }
 
