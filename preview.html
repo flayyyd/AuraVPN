@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AuraVPN — Final iOS Dribbble Edition</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+    }
+    body {
+      background: #0B0C10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      padding: 24px;
+    }
+    /* iPhone 16 Pro Frame */
+    .iphone-frame {
+      width: 400px;
+      height: 830px;
+      background: #FAFBFD;
+      border-radius: 54px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 35px 90px rgba(0, 0, 0, 0.8), 0 0 0 12px #212228, 0 0 0 14px #14151A;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Dynamic Island */
+    .dynamic-island {
+      width: 122px;
+      height: 35px;
+      background: #000;
+      border-radius: 20px;
+      position: absolute;
+      top: 13px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .island-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #7B7FFA;
+    }
+    .island-dot {
+      width: 7px;
+      height: 7px;
+      background: #555;
+      border-radius: 50%;
+      transition: background 0.3s;
+    }
+    .status-bar {
+      height: 52px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 34px 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #111;
+      z-index: 90;
+    }
+    /* Scroll Content */
+    .screen-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 24px 140px;
+      scrollbar-width: none;
+    }
+    .screen-content::-webkit-scrollbar {
+      display: none;
+    }
+    /* Header (Чистое имя без лишнего текста) */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .header h1 {
+      font-family: Georgia, "Playfair Display", serif;
+      font-size: 32px;
+      font-weight: bold;
+      color: #121317;
+      letter-spacing: -0.4px;
+    }
+    /* LIQUID GLASS SETTINGS */
+    .liquid-glass-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1.2px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05), inset 0 1px 2px rgba(255, 255, 255, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #121317;
+      transition: all 0.2s;
+    }
+    .liquid-glass-btn:active {
+      transform: scale(0.92);
+    }
+    /* Central Power Button */
+    .power-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 10px 0 38px;
+    }
+    .power-outer-ring {
+      width: 176px;
+      height: 176px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(123, 127, 250, 0.08);
+      transition: all 0.4s ease;
+      cursor: pointer;
+    }
+    .power-outer-ring.connected {
+      background: rgba(52, 211, 153, 0.15);
+      box-shadow: 0 0 45px rgba(52, 211, 153, 0.22);
+    }
+    .power-btn {
+      width: 142px;
+      height: 142px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      box-shadow: 0 14px 38px rgba(123, 127, 250, 0.16);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .power-btn:active {
+      transform: scale(0.94);
+    }
+    .power-icon {
+      width: 40px;
+      height: 40px;
+      fill: none;
+      stroke: #7B7FFA;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: stroke 0.3s;
+    }
+    .power-outer-ring.connected .power-icon {
+      stroke: #10B981;
+    }
+    .power-btn span {
+      font-size: 11px;
+      font-weight: 800;
+      color: #9AA0B2;
+      letter-spacing: 0.8px;
+    }
+    .status-title {
+      margin-top: 16px;
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #7B7FFA;
+      letter-spacing: 0.8px;
+    }
+    .status-title.connected {
+      color: #10B981;
+    }
+    .status-sub {
+      font-size: 12px;
+      color: #8C90A0;
+      margin-top: 3px;
+    }
+    /* Section Header with ONE Global Ping Button */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-family: Georgia, serif;
+      font-size: 22px;
+      font-weight: bold;
+      color: #121317;
+    }
+    .ping-all-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #FFFFFF;
+      padding: 7px 12px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.035);
+      font-size: 12px;
+      font-weight: 600;
+      color: #7B7FFA;
+      cursor: pointer;
+      border: 1px solid rgba(123, 127, 250, 0.15);
+      transition: all 0.2s;
+    }
+    .ping-all-btn:hover {
+      background: #F4F5FF;
+    }
+    .ping-all-btn:active {
+      transform: scale(0.95);
+    }
+    .ping-all-icon {
+      width: 13px;
+      height: 13px;
+      transition: transform 0.6s;
+    }
+    .ping-all-btn.spinning .ping-all-icon {
+      animation: spinPing 0.8s linear infinite;
+    }
+    @keyframes spinPing {
+      100% { transform: rotate(360deg); }
+    }
+    /* Server Cards */
+    .server-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .server-card {
+      background: #FFFFFF;
+      border-radius: 22px;
+      padding: 15px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+      border: 1.5px solid transparent;
+      transition: all 0.2s ease;
+    }
+    .server-card:hover {
+      box-shadow: 0 8px 24px rgba(123, 127, 250, 0.08);
+    }
+    .server-card.selected {
+      border-color: #7B7FFA;
+      box-shadow: 0 10px 28px rgba(123, 127, 250, 0.12);
+    }
+    .flag-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: #F4F5F9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .server-card.selected .flag-box {
+      background: #EEEEFD;
+    }
+    /* Vector Flags */
+    .vector-flag {
+      width: 28px;
+      height: 20px;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+      border: 0.5px solid rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+    .flag-ru .stripe-1 { height: 33.3%; background: #FFFFFF; }
+    .flag-ru .stripe-2 { height: 33.3%; background: #0039A6; }
+    .flag-ru .stripe-3 { height: 33.4%; background: #D52B1E; }
+    .flag-de .stripe-1 { height: 33.3%; background: #000000; }
+    .flag-de .stripe-2 { height: 33.3%; background: #DD0000; }
+    .flag-de .stripe-3 { height: 33.4%; background: #FFCE00; }
+    .auto-orbit-icon {
+      width: 26px;
+      height: 26px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .orbit-ring {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px dashed #7B7FFA;
+      animation: rotateOrbit 12s linear infinite;
+    }
+    @keyframes rotateOrbit {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .orbit-center {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #7B7FFA;
+      box-shadow: 0 0 8px rgba(123, 127, 250, 0.6);
+    }
+    .direct-shield-icon {
+      width: 24px;
+      height: 24px;
+      color: #F59E0B;
+    }
+    .server-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .server-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #121317;
+      margin-bottom: 3px;
+    }
+    .server-sub {
+      font-size: 11.5px;
+      color: #8C90A0;
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .server-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ping-display {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #8C90A0;
+      font-family: monospace;
+    }
+    .ping-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #10B981;
+    }
+    .radio-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #E1E3EB;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .server-card.selected .radio-circle {
+      border-color: #7B7FFA;
+      background: #7B7FFA;
+    }
+    .radio-circle::after {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #fff;
+      display: none;
+    }
+    .server-card.selected .radio-circle::after {
+      display: block;
+    }
+    /* BOTTOM FROSTED BLUR MASK (Зона под панелью красиво заблюривается) */
+    .bottom-blur-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 120px;
+      pointer-events: none;
+      background: linear-gradient(to top, rgba(250, 251, 253, 0.96) 0%, rgba(250, 251, 253, 0.6) 45%, rgba(250, 251, 253, 0) 100%);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      mask-image: linear-gradient(to top, black 40%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to top, black 40%, transparent 100%);
+      z-index: 92;
+    }
+    /* LIQUID GLASS BOTTOM DOCK */
+    .liquid-glass-dock {
+      position: absolute;
+      bottom: 22px;
+      left: 36px;
+      right: 36px;
+      height: 64px;
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(35px);
+      -webkit-backdrop-filter: blur(35px);
+      border-radius: 36px;
+      border: 1.2px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), inset 0 1px 3px rgba(255, 255, 255, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 98;
+      padding: 0 14px;
+    }
+    .dock-icon-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #8C90A0;
+      transition: all 0.2s;
+    }
+    .dock-icon-btn.active {
+      background: #7B7FFA;
+      color: #FFFFFF;
+      box-shadow: 0 4px 16px rgba(123, 127, 250, 0.4);
+    }
+    .dock-icon-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="iphone-frame">
+    <!-- Dynamic Island -->
+    <div class="dynamic-island">
+      <div class="island-pill">
+        <div class="island-dot" id="islandDot"></div>
+        <span>Aura</span>
+      </div>
+      <span style="color: #888; font-size: 10px;" id="islandSpeed">OFF</span>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span>9:41</span>
+      <div style="display:flex; gap:6px; font-size:12px;">
+        <span>5G</span>
+        <span>100%</span>
+      </div>
+    </div>
+
+    <!-- Screen Content -->
+    <div class="screen-content">
+      <!-- 1. Header (ТОЧЬ-В-ТОЧЬ КАК НА DRIBBBLE: Сериф "Привет, Алекс" + 2 стеклянные круглые кнопки) -->
+      <div class="header">
+        <h1>Привет, Алекс</h1>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <div class="liquid-glass-btn" title="Поиск" onclick="document.getElementById('pingAllBtn').click()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <div class="liquid-glass-btn" title="Настройки">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="21" x2="4" y2="14"></line>
+              <line x1="4" y1="10" x2="4" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12" y2="3"></line>
+              <line x1="20" y1="21" x2="20" y2="16"></line>
+              <line x1="20" y1="12" x2="20" y2="3"></line>
+              <line x1="1" y1="14" x2="7" y2="14"></line>
+              <line x1="9" y1="8" x2="15" y2="8"></line>
+              <line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Центральная кнопка питания -->
+      <div class="power-section">
+        <div class="power-outer-ring" id="powerRing" onclick="toggleVPN()">
+          <div class="power-btn">
+            <svg class="power-icon" id="powerIcon" viewBox="0 0 24 24">
+              <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+              <line x1="12" y1="2" x2="12" y2="12"></line>
+            </svg>
+            <span id="powerText">ВКЛ</span>
+          </div>
+        </div>
+        <div class="status-title" id="statusLabel">НАЖМИТЕ ДЛЯ СТАРТА</div>
+        <div class="status-sub" id="statusSub">Туннель не активен</div>
+      </div>
+
+      <!-- 3. Список серверов с ЕДИНОЙ кнопкой пинга справа -->
+      <div class="section-header">
+        <div class="section-title">Серверы</div>
+        <div class="ping-all-btn" id="pingAllBtn" onclick="pingAllServers()">
+          <svg class="ping-all-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          <span>Пинг всех</span>
+        </div>
+      </div>
+
+      <div class="server-list">
+        <!-- 1. AUTO SMART -->
+        <div class="server-card selected" onclick="selectServer(this, 'Автоматический выбор', 7)">
+          <div class="flag-box">
+            <div class="auto-orbit-icon">
+              <div class="orbit-ring"></div>
+              <div class="orbit-center"></div>
+            </div>
+          </div>
+          <div class="server-info">
+            <div class="server-name">Автоматический выбор</div>
+            <div class="server-sub">YouTube в РФ • Мир в Германии • Банки прямо</div>
+          </div>
+          <div class="server-meta">
+            <div class="ping-display"><div class="ping-dot"></div> <span id="pingAuto">7 ms</span></div>
+            <div class="radio-circle"></div>
+          </div>
+        </div>
+
+        <!-- 2. ZAPRET RU -->
+        <div class="server-card" onclick="selectServer(this, 'Россия (Zapret 4K)', 9)">
+          <div class="flag-box">
+            <div class="vector-flag flag-ru">
+              <div class="stripe-1"></div>
+              <div class="stripe-2"></div>
+              <div class="stripe-3"></div>
+            </div>
+          </div>
+          <div class="server-info">
+            <div class="server-name">Россия (Zapret 4K)</div>
+            <div class="server-sub">YouTube & Discord без ограничений</div>
+          </div>
+          <div class="server-meta">
+            <div class="ping-display"><div class="ping-dot"></div> <span id="pingRu">9 ms</span></div>
+            <div class="radio-circle"></div>
+          </div>
+        </div>
+
+        <!-- 3. GERMANY -->
+        <div class="server-card" onclick="selectServer(this, 'Германия (Франкфурт)', 42)">
+          <div class="flag-box">
+            <div class="vector-flag flag-de">
+              <div class="stripe-1"></div>
+              <div class="stripe-2"></div>
+              <div class="stripe-3"></div>
+            </div>
+          </div>
+          <div class="server-info">
+            <div class="server-name">Германия (Франкфурт)</div>
+            <div class="server-sub">Instagram • ChatGPT • Зарубежный веб</div>
+          </div>
+          <div class="server-meta">
+            <div class="ping-display"><div class="ping-dot" style="background:#F59E0B"></div> <span id="pingDe">42 ms</span></div>
+            <div class="radio-circle"></div>
+          </div>
+        </div>
+
+        <!-- 4. DIRECT -->
+        <div class="server-card" onclick="selectServer(this, 'Прямой доступ', 2)">
+          <div class="flag-box">
+            <svg class="direct-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <polygon points="13 6 8 14 12 14 11 18 16 10 12 10 13 6" fill="#F59E0B" stroke="none"></polygon>
+            </svg>
+          </div>
+          <div class="server-info">
+            <div class="server-name">Прямой доступ</div>
+            <div class="server-sub">Сбер • Т-Банк • Госуслуги</div>
+          </div>
+          <div class="server-meta">
+            <div class="ping-display"><div class="ping-dot"></div> <span id="pingDirect">2 ms</span></div>
+            <div class="radio-circle"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Зона размытия при прокрутке под док-бар -->
+    <div class="bottom-blur-container"></div>
+
+    <!-- 4. LIQUID GLASS FLOATING DOCK -->
+    <div class="liquid-glass-dock">
+      <div class="dock-icon-btn active" title="VPN">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+        </svg>
+      </div>
+
+      <div class="dock-icon-btn" title="Статистика">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+      </div>
+
+      <div class="dock-icon-btn" title="Настройки">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let isConnected = false;
+    let currentServer = "Автоматический выбор";
+
+    function toggleVPN() {
+      const ring = document.getElementById('powerRing');
+      const statusLabel = document.getElementById('statusLabel');
+      const statusSub = document.getElementById('statusSub');
+      const powerText = document.getElementById('powerText');
+      const islandDot = document.getElementById('islandDot');
+      const islandSpeed = document.getElementById('islandSpeed');
+
+      if (!isConnected) {
+        statusLabel.innerText = "ПОДКЛЮЧЕНИЕ...";
+        statusLabel.style.color = "#F59E0B";
+        statusSub.innerText = "Установка защищенного туннеля";
+
+        setTimeout(() => {
+          isConnected = true;
+          ring.classList.add('connected');
+          statusLabel.innerText = "ПОДКЛЮЧЕНО";
+          statusLabel.classList.add('connected');
+          statusLabel.style.color = "#10B981";
+          statusSub.innerText = currentServer + " • 42 MB/s";
+          powerText.innerText = "ВКЛ";
+          islandDot.style.background = "#10B981";
+          islandSpeed.innerText = "42 MB/s";
+        }, 500);
+      } else {
+        isConnected = false;
+        ring.classList.remove('connected');
+        statusLabel.innerText = "НАЖМИТЕ ДЛЯ СТАРТА";
+        statusLabel.classList.remove('connected');
+        statusLabel.style.color = "#7B7FFA";
+        statusSub.innerText = "Туннель не активен";
+        powerText.innerText = "ВЫКЛ";
+        islandDot.style.background = "#555";
+        islandSpeed.innerText = "OFF";
+      }
+    }
+
+    function selectServer(card, name, ping) {
+      document.querySelectorAll('.server-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      currentServer = name;
+      if (isConnected) {
+        toggleVPN();
+        setTimeout(toggleVPN, 200);
+      }
+    }
+
+    function pingAllServers() {
+      const btn = document.getElementById('pingAllBtn');
+      btn.classList.add('spinning');
+
+      setTimeout(() => {
+        btn.classList.remove('spinning');
+        document.getElementById('pingAuto').innerText = (Math.floor(Math.random() * 4) + 6) + " ms";
+        document.getElementById('pingRu').innerText = (Math.floor(Math.random() * 4) + 8) + " ms";
+        document.getElementById('pingDe').innerText = (Math.floor(Math.random() * 6) + 39) + " ms";
+        document.getElementById('pingDirect').innerText = (Math.floor(Math.random() * 2) + 2) + " ms";
+      }, 700);
+    }
+  </script>
+</body>
+</html>

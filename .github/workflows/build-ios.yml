@@ -1,0 +1,49 @@
+name: Build iOS .IPA
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Build App (iOS Release)
+        run: |
+          xcodebuild \
+            -project AuraVPN.xcodeproj \
+            -scheme AuraVPN \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package into .IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/AuraVPN.app Payload/
+          zip -r AuraVPN.ipa Payload
+          rm -rf Payload
+
+      - name: Upload .IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AuraVPN-iOS-App
+          path: AuraVPN.ipa
+          if-no-files-found: error
