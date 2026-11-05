@@ -21,9 +21,8 @@ targets:
     deploymentTarget: "16.0"
     sources:
       - path: AuraVPN
+    info:
+      path: AuraVPN/Info.plist
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.auravpn.app
-      INFOPLIST_KEY_CFBundleDisplayName: "AuraVPN"
-      INFOPLIST_KEY_UILaunchScreen_Generation: YES
-      INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait"
-      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      GENERATE_INFOPLIST_FILE: NO
